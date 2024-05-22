@@ -1,0 +1,38 @@
+body {
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
+    margin-left: 50px;
+    padding: 0;
+}
+
+h1 {
+    font-size: 3em;
+    font-weight: lighter;
+    letter-spacing: -0.09rem;
+    padding-bottom: 20px;
+    padding-top: 20px;
+}
+
+form {
+    font-size: 1.5em;
+    padding-bottom: 20px;
+    padding-top: 20px;
+}
+
+input {
+    font-size: 1em;
+    border: 1px solid;
+    border-color: #aaaaaa;
+    font-family: "Open Sans", Arial, Helvetica, sans-serif;
+}
+
+.google-visualization-tooltip {
+    border: 1px solid black !important;
+    border-radius: 4px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+
+.text-muted {
+    opacity: 0.5;
+    font-size: 0.75em;
+}

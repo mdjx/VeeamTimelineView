@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Veeam Job Duration</title>
+    <script type="text/javascript" src="js/loader.js"></script>
+    <link rel="stylesheet" type="text/css" href="/css/style.css" media="all">
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:300' rel='stylesheet' type='text/css'>
+</head>
+
+<body>
+    <h1>
+        Veeam
+        <small class="text-muted">
+            Backup job timeline
+        </small>
+    </h1>
+    <form>
+        <input type="date" id="date"></input>
+        <label id="errors"></label>
+    </form>
+    <div id="timeline" style="max-width: 96%;"></div>
+    <script type="text/javascript">
+
+        // load todays results by default
+        const today = new Date().toISOString().split("T")[0] + ".json"
+        LoadJsonDATA(today)
+
+        // add trigger to update timeline based on selected date
+        document.getElementById("date").addEventListener('change', e => {
+            date = e.target.valueAsDate
+            jsonFilename = date.toISOString().split("T")[0] + ".json"
+            console.log(jsonFilename)
+            LoadJsonDATA(jsonFilename)
+
+        })
+
+        function LoadJsonDATA(fileName) {
+            path = "backupdata/" + fileName
+            fetch(path)
+                .then((response) => response.json())
+                .then(function (backupdata) {
+                    google.charts.load('current', { 'packages': ['timeline'] });
+                    google.charts.setOnLoadCallback(drawChart);
+                    function drawChart() {
+                        var container = document.getElementById('timeline');
+                        var chart = new google.visualization.Timeline(container);
+                        var dataTable = new google.visualization.DataTable();
+
+                        dataTable.addColumn({ type: 'string', id: 'BackupJob' });
+                        dataTable.addColumn({ type: 'string', id: 'Name' });
+                        dataTable.addColumn({ type: 'string', id: 'Tooltip', role: 'tooltip', 'p': { 'html': true } });
+                        dataTable.addColumn({ type: 'string', id: 'Style', role: 'style' });
+                        dataTable.addColumn({ type: 'date', id: 'StartTime' });
+                        dataTable.addColumn({ type: 'date', id: 'EndTime' });
+
+                        // re-order array based on start date and time
+                        backupdata.sort((a, b) => {
+                            return new Date(a.StartTimeUTC) - new Date(b.StartTimeUTC);
+                        })
+
+                        rows = []
+                        backupdata.forEach(function (element) {
+
+                            // set bar color based on job result
+                            console.log(element.Result)
+                            switch (element.Result) {
+                                case 0:
+                                    barColor = "#589c4a"
+                                    break;
+                                case 1:
+                                    barColor = "#f4d03f"
+                                    break;
+                                case 2:
+                                    barColor = "#ff6a6a"
+                                    break;
+                                default:
+                                    barColor = "#cccccc"
+                            }
+
+                            element.Tooltip = {
+                                "Name": element.Name,
+                                "Duration": element.Duration,
+                                "BackupType": element.Type,
+                                "SessionType": element.SessionType,
+                                "StartTime": element.StartTimeLocal,
+                                "EndTime": element.EndTimeLocal,
+                                "Result": element.Result,
+                                "Notes": element.Notes || "N/A"
+                            }
+
+
+                            // create array and populate with data for chart
+                            rows.push([
+                                element.Name,
+                                element.DisplayType,
+                                `<pre>${JSON.stringify(element.Tooltip, undefined, 2)}</pre>`,
+                                `color: ${barColor}`,
+                                new Date(element.StartTimeUTC),
+                                new Date(element.EndTimeUTC),
+                            ])
+                        });
+
+                        dataTable.addRows(rows)
+
+                        // dynamically determine chart height based on number of rows
+                        var chartHeight = dataTable.getNumberOfRows() * 40;
+
+                        var options = {
+                            timeline: {
+                                showRowLabels: true,
+                            },
+                            enableInteractivity: true,
+                            height: (chartHeight + 100)
+                        };
+
+                        chart.draw(dataTable, options);
+                        document.getElementById('errors').innerHTML = ""
+                    }
+                }).catch((e) => {
+                    document.getElementById('errors').innerHTML = "No data available for selected date"
+                    document.getElementById('timeline').innerHTML = "";
+                    console.log(e)
+                });
+        }
+    </script>
+</body>
+
+</html>
