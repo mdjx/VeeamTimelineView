@@ -26,3 +26,5 @@ The PowerShell script will output JSON files, the plumbing of those JSON files t
 ## Notes
 
 This is from a pet project from years ago. It has been updated to remove Bootstrap 3.3.7 (released in 2016, to give you an idea of the age) and jQuery. Not much else has been updated, so there is plenty of room for improvement.
+
+Wrote a bit more about it in this [blog post](https://xkln.net/blog/timeline-visualisation-of-veeam-backup-job-sessions/)
